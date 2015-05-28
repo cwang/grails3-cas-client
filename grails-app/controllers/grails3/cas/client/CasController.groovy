@@ -5,7 +5,7 @@ import edu.yale.its.tp.cas.client.filter.CASFilter
 
 class CasController {
 
-	def index() = {
+	def index() {
 		if (!grailsApplication.config.cas.mocking) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND)
 			return

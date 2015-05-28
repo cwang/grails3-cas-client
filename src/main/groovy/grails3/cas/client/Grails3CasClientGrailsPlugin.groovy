@@ -1,6 +1,9 @@
 package grails3.cas.client
 
 import grails.plugins.*
+import edu.yale.its.tp.cas.client.filter.*
+import org.springframework.boot.context.embedded.FilterRegistrationBean
+import org.springframework.core.Ordered
 
 class Grails3CasClientGrailsPlugin extends Plugin {
 
@@ -30,31 +33,52 @@ Please make sure necessary configurations are made in your Grails application's 
     def issueManagement = [ system: "github", url: "https://github.com/cwang/grails3-cas-client/issues" ]
 
     def scm = [ url: "https://github.com/cwang/grails3-cas-client.git" ]
+    
+    // plugin-specific variables
+    private final static String PACKAGE_PREFIX = CASFilter.class.package.name + '.'
+    private final static String[] FIELDS_OPTIONAL = ['serverName', 'serviceUrl', 'proxyCallbackUrl', 'authorizedProxy', 'renew', 'wrapRequest']
+    private final static String[] FIELDS_REQUIRED = ['loginUrl', 'validateUrl']
+    private final static String OUTPUT_FORMAT = "[CAS Client Plugin] %s\n"
 
     Closure doWithSpring() { {->
+            if (config.cas.disabled) {
+                printf(OUTPUT_FORMAT, 'CAS Client plugin is disabled therefore nothing needs to be done here.')
+            }
+            else {
+                casFilter(FilterRegistrationBean) {
+                    filter = bean(CASFilter)
+                    initParameters = (FIELDS_REQUIRED + FIELDS_OPTIONAL).findAll { config.cas[it] instanceof String || config.cas[it] instanceof Boolean }.collectEntries { [(PACKAGE_PREFIX + it): config.cas[it]] }
+                    urlPatterns = config.cas.urlPattern
+                    order = Ordered.HIGHEST_PRECEDENCE
+                }
+                printf(OUTPUT_FORMAT, "CAS Client plugin is enabled with CAS login url [${config.cas.loginUrl}].")
+            }
+                              
+            if (config.cas.mocking) {
+                printf(OUTPUT_FORMAT, '/cas?u=USERNAME is available for mocking cas-ified user session.')
+                printf(OUTPUT_FORMAT, 'Please take extra care as mocking should NOT be allowed for production environment!')
+
+            }
         } 
     }
 
     void doWithDynamicMethods() {
-        // TODO Implement registering dynamic methods to classes (optional)
+        // Nothing to do.
     }
 
     void doWithApplicationContext() {
-        // TODO Implement post initialization spring config (optional)
+        // Nothing to do.
     }
 
     void onChange(Map<String, Object> event) {
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
+        // Nothing to do.
     }
 
     void onConfigChange(Map<String, Object> event) {
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
+        // Nothing to do.
     }
 
     void onShutdown(Map<String, Object> event) {
-        // TODO Implement code that is executed when the application shuts down (optional)
+        // Nothing to do.
     }
 }
