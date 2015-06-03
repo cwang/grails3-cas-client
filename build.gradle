@@ -20,6 +20,7 @@ version "3.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
+//apply plugin: 'com.jfrog.bintray'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: "spring-boot"
@@ -27,7 +28,7 @@ apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
 // Used for publishing to central repository, remove if not needed
 apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
+// apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
 
 ext {
     grailsVersion = project.grailsVersion
@@ -71,4 +72,27 @@ dependencies {
 
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
+}
+
+bintray {
+    user = bintray_user		// from ~/.gradle/gradle.properties
+    key = bintray_api_key	// from ~/.gradle/gradle.properties
+
+    publications = ['maven']
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = "org.grails.plugins:$project.name"
+        desc = 'JA-SIG CAS Client for Grails 3'
+        websiteUrl = 'https://github.com/cwang/grails3-cas-client/'
+        issueTrackerUrl = 'https://github.com/cwang/grails3-cas-client/issues'
+        vcsUrl = 'https://github.com/cwang/grails3-cas-client.git'
+        licenses = ['Apache-2.0']
+        labels = ['grails', 'plugins', 'ja-sig cas client']
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            attributes = ['grails-plugin': "org.grails.plugins:$project.name"]
+        }
+    }
 }
